@@ -79,11 +79,15 @@ export const Board = () => {
           }
 
           if (source.data.type === "task") {
-            context.actions.moveTask(
-              startId,
-              destinationId,
-              getEdgeVertical(closestEdge),
-            );
+            if (destination.data.type === "column") {
+              context.actions.moveTaskToColumn(startId, destinationId);
+            } else {
+              context.actions.moveTask(
+                startId,
+                destinationId,
+                getEdgeVertical(closestEdge),
+              );
+            }
           }
         },
       }),

@@ -20,7 +20,7 @@ import {
   IconEdit,
   IconMoveGroup,
 } from "@/components/icons";
-import { Menu } from "@/components/shared/menu";
+import { Menu, type MenuProps } from "@/components/shared/menu";
 import { FieldCheckbox } from "@/components/shared/form/checkbox";
 import { ButtonIcon } from "@/components/shared/button";
 import type { TDragStateColumn } from "@/types/common";
@@ -231,21 +231,11 @@ export const Column: React.FC<Props> = memo(
           onClick: () => onMoveColumn(id, item.id, "right"),
         }));
 
-      return [
+      const arr: MenuProps["items"] = [
         {
           label: "Edit",
           icon: <IconEdit />,
           onClick: () => onEdit(data),
-        },
-        {
-          label: "Move before",
-          icon: <IconMoveGroup />,
-          items: moveBeforeItems,
-        },
-        {
-          label: "Move after",
-          icon: <IconMoveGroup />,
-          items: moveAfterItems,
         },
         {
           label: "Delete",
@@ -253,6 +243,24 @@ export const Column: React.FC<Props> = memo(
           onClick: () => onDelete(id),
         },
       ];
+
+      if (moveAfterItems.length) {
+        arr.splice(1, 0, {
+          label: "Move after",
+          icon: <IconMoveGroup />,
+          items: moveAfterItems,
+        });
+      }
+
+      if (moveBeforeItems.length) {
+        arr.splice(1, 0, {
+          label: "Move before",
+          icon: <IconMoveGroup />,
+          items: moveBeforeItems,
+        });
+      }
+
+      return arr;
     }, [onDelete, onEdit, onMoveColumn, moveItems, data, id]);
 
     return (

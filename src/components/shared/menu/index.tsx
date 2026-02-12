@@ -16,7 +16,7 @@ interface MenuItem {
   isActive?: boolean;
 }
 
-interface MenuProps {
+export interface MenuProps {
   items: MenuItem[];
   buttonOptions?: ButtonProps;
 }

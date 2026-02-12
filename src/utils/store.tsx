@@ -13,7 +13,13 @@ class Store {
 
   constructor(storage: Storage) {
     this.storage = storage;
-    this.data = JSON.parse(this.storage.getItem(KEY) || "");
+    try {
+      const raw = this.storage.getItem(KEY);
+      this.data = raw ? JSON.parse(raw) : null;
+    } catch {
+      this.data = {};
+      this.storage.removeItem(KEY);
+    }
   }
   public setData(data: Record<string, any>) {
     this.storage.setItem(KEY, JSON.stringify(data));

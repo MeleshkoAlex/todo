@@ -1,0 +1,25 @@
+.control {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    &__label {
+        font-size: 14px;
+        color: var(--color-gray-500);
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__required {
+        margin-left: 4px;
+        color: var(--color-error);
+    }
+
+    &__error {
+        font-size: 12px;
+        color: var(--color-error);
+    }
+}

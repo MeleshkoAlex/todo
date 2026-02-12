@@ -1,0 +1,70 @@
+@use "./variables" as *;
+@use "sass:map";
+@use "sass:meta";
+@use "sass:math";
+
+@function _resolve-breakpoint($value) {
+    @if meta.type-of($value)=='string' and map.has_key($breakpoints, $value) {
+        $bp: map.get($breakpoints, $value);
+
+        @if math.is-unitless($bp) {
+            @return $bp * 1px;
+        }
+
+        @else {
+            @return $bp;
+        }
+    }
+
+    @else if meta.type-of($value)=='number' {
+        @if math.is-unitless($value) {
+            @return $value * 1px;
+        }
+
+        @else {
+            @return $value;
+        }
+    }
+
+    @else if meta.type-of($value)=='string' and str-index($value, "px") {
+        @return $value;
+    }
+
+    @else {
+        @error "invalid breakpoint: #{$value}";
+    }
+}
+
+@mixin media($start, $end: min) {
+    $start-size: _resolve-breakpoint($start);
+
+    @if $end ==min {
+        @media (min-width: $start-size) {
+            @content;
+        }
+    }
+
+    @else if $end ==max {
+        @media (max-width: ($start-size - 0.1px)) {
+            @content;
+        }
+    }
+
+    @else {
+        $end-size: _resolve-breakpoint($end);
+
+        @if $start-size >=$end-size {
+            @warn "media(): $start (#{ $start-size }) >= $end (#{ $end-size }). The range may be empty.";
+        }
+
+        @media (min-width: $start-size) and (max-width: ($end-size - 0.1px)) {
+            @content;
+        }
+    }
+}
+
+@mixin hover {
+    @media (hover: hover) and (pointer: fine) {
+        @content;
+    }
+}

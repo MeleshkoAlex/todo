@@ -1,0 +1,36 @@
+@use "@/style/mixins" as *;
+
+.dropdown {
+    display: flex;
+    flex-direction: column;
+    min-width: 100px;
+    padding: 5px;
+    background-color: var(--color-white);
+    box-shadow: 0 4px 12px var(--color-shadow);
+    border-radius: 4px;
+
+    @include media(md, max) {
+        position: fixed;
+        top: 100%;
+        right: 0;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+    }
+
+    &__backdrop {
+        display: none;
+
+        @include media(md, max) {
+            display: block;
+            position: fixed;
+            width: 100vw;
+            height: 100dvh;
+            background: rgba(0, 0, 0, 0.3);
+            left: 0;
+            top: 0;
+            z-index: 999;
+        }
+    }
+}

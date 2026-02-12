@@ -1,0 +1,14 @@
+@use './normalize';
+@use './common';
+@use './variables' as *;
+@use "sass:list";
+
+:root {
+    @each $name, $value in $colors {
+        --color-#{"" + $name}: #{$value};
+    }
+}
+
+* {
+    box-sizing: border-box;
+}

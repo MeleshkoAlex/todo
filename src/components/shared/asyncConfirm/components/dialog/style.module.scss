@@ -1,0 +1,41 @@
+@use "@/style/animation" as *;
+
+.confirm {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s forwards ease-out;
+
+    &__backdrop {
+        position: absolute;
+        inset: 0;
+        background: var(--color-shadow-400)
+    }
+
+    &__box {
+        position: relative;
+        background: var(--color-white);
+        padding: 24px;
+        border-radius: 10px;
+        min-width: 280px;
+        z-index: 1001;
+    }
+
+    &__title {
+        margin: 0 0 8px;
+        font-size: 18px;
+    }
+
+    &__message {
+        margin: 0 0 16px;
+        font-size: 15px;
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+}

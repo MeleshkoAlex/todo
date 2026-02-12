@@ -1,0 +1,52 @@
+.container {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    padding: 20px;
+    box-shadow: 0 2px 4px var(--color-shadow);
+    position: relative;
+    z-index: 2;
+    background: var(--color-white);
+}
+
+.toolbar {
+    padding: 20px;
+    box-shadow: 0 2px 4px var(--color-shadow);
+    background: var(--color-white);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.workspace {
+    padding: 15px;
+    margin-top: 40px;
+    max-width: 100%;
+    overflow: auto;
+    flex-grow: 1;
+
+    &__inner {
+        display: flex;
+        gap: 40px;
+    }
+}
+
+.column {
+    flex-shrink: 0;
+    width: min(300px, 80vw);
+}
+
+.filter_count {
+    font-size: 8px;
+    border-radius: 50%;
+    background: var(--color-gray-200);
+    height: 16px;
+    width: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}

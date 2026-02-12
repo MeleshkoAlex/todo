@@ -1,0 +1,91 @@
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0;
+        line-height: 0;
+    }
+
+    &--full {
+        width: 100%;
+    }
+
+    &--primary {
+        background-color: var(--color-blue-500);
+        border: 1px solid var(--color-blue-500);
+        color: var(--color-white);
+
+        &:hover {
+            background-color: var(--color-blue-600);
+            border-color: var(--color-blue-600);
+        }
+
+        &:disabled {
+            background-color: var(--color-blue-400);
+            border-color: var(--color-blue-400);
+        }
+    }
+
+    &--secondary {
+        background-color: var(--color-gray-500);
+        border: 1px solid var(--color-gray-500);
+        color: var(--color-white);
+
+        &:hover {
+            background-color: var(--color-gray-600);
+            border-color: var(--color-blue-400);
+
+        }
+
+        &:disabled {
+            background-color: var(--color-gray-400);
+            border-color: var(--color-blue-400);
+        }
+    }
+
+    &--ghost {
+        background-color: transparent;
+        border: 1px solid transparent;
+
+        &:hover {
+            background-color: var(--color-blue-100);
+            border: 1px solid var(--color-blue-100);
+
+        }
+
+        &:disabled {
+            background-color: var(--color-blue-50);
+            border: 1px solid var(--color-blue-50);
+        }
+    }
+
+    &--border {
+        background-color: transparent;
+        color: var(--color-primary);
+        border: 1px solid var(--color-gray-500);
+
+        &:hover {
+            border-color: var(--color-gray-600);
+        }
+
+        &:disabled {
+            color: var(--color-gray-500);
+            border: 1px solid var(--color-gray-600);
+        }
+    }
+}

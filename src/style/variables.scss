@@ -1,0 +1,43 @@
+$colors: (
+    primary: #0F0F0F,
+    secondary: #888888,
+    white: #ffffff,
+    black: #000000,
+    error: #D5280C,
+    yellow: #f7e799,
+
+    shadow: rgba(0, 0, 0, 0.1),
+    shadow-200: rgba(0, 0, 0, 0.2),
+    shadow-300: rgba(0, 0, 0, 0.3),
+    shadow-400: rgba(0, 0, 0, 0.4),
+    shadow-500: rgba(0, 0, 0, 0.5),
+
+    blue-50: #ebf5ff,
+    blue-100: #d0e2ff,
+    blue-200: #a6c8ff,
+    blue-300: #78a9ff,
+    blue-400: #4d8cff,
+    blue-500: #007bff,
+    blue-600: #0069d9,
+    blue-700: #0056b3,
+    blue-800: #004085,
+    blue-900: #002752,
+
+    gray-50: #f9fafb,
+    gray-100: #f1f5f9,
+    gray-200: #e0e0e0,
+    gray-300: #d1d5db,
+    gray-400: #a1a1a1,
+    gray-500: #6c757d,
+    gray-600: #4b5563,
+    gray-700: #374151,
+    gray-800: #1f2937,
+    gray-900: #111827
+);
+
+$breakpoints: (
+    sm: 576px,
+    md: 768px,
+    lg: 992px,
+    xl: 1250px,
+);

@@ -1,0 +1,36 @@
+@use "@/style/mixins" as *;
+
+.wrapper {
+    width: calc(100% + 10px);
+    position: relative;
+    margin-left: -5px;
+    margin-right: -5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.inner {
+    display: none;
+    background: var(--color-white);
+    border-radius: 5px;
+    z-index: 1000;
+    padding: 5px;
+
+    @include media(md, max) {
+        display: block;
+        padding-left: 20px;
+    }
+
+
+    @include media(md) {
+        position: absolute;
+        top: 0;
+        left: 100%;
+        z-index: 1000;
+        box-shadow: 0 4px 12px var(--color-shadow);
+    }
+
+    &--open {
+        display: block;
+    }
+}

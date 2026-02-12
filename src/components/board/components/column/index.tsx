@@ -1,34 +1,20 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 
 import cn from "classnames";
-import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
-import {
-  draggable,
-  dropTargetForElements,
-} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import {
-  attachClosestEdge,
-  extractClosestEdge,
-} from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
-import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 
 import { Button } from "@/components/shared/button/base";
 import type { Actions, IColumn, ITask, TItemValue } from "@/context/types";
-import {
-  IconDelete,
-  IconDragIndicator,
-  IconEdit,
-  IconMoveGroup,
-} from "@/components/icons";
-import { Menu, type MenuProps } from "@/components/shared/menu";
+import { IconDragIndicator } from "@/components/icons";
+import { Menu } from "@/components/shared/menu";
 import { FieldCheckbox } from "@/components/shared/form/checkbox";
 import { ButtonIcon } from "@/components/shared/button";
-import type { TDragStateColumn } from "@/types/common";
+import type { moveItem, TDragStateColumn } from "@/types/common";
 
 import { Card } from "../card";
 import { CreateTaskModal } from "../modals/createTask";
 
 import styles from "./style.module.scss";
+import { handleDrag, prepareMenuItems } from "./utils";
 
 interface Props {
   data: IColumn;
@@ -43,7 +29,7 @@ interface Props {
   onMoveTask: Actions["moveTaskToColumn"];
   onMoveColumn: Actions["moveColumn"];
   onEdit: (column: IColumn) => void;
-  moveItems: { id: string; name: string }[];
+  moveItems: moveItem[];
 }
 
 export const Column: React.FC<Props> = memo(
@@ -67,7 +53,6 @@ export const Column: React.FC<Props> = memo(
     const dragHandleRef = useRef<HTMLButtonElement | null>(null);
     const [dragState, setDragState] = useState<TDragStateColumn>({
       state: "idle",
-      direction: undefined,
     });
     const [selectedTask, setSelectedTask] = useState<ITask | undefined>();
     const [isOpenAddTask, setIsOpenAddTask] = useState(false);
@@ -79,78 +64,17 @@ export const Column: React.FC<Props> = memo(
     }, [dragState]);
 
     useEffect(() => {
-      const el = triggerRef;
+      const triggerEl = triggerRef;
       const dragEl = dragHandleRef.current;
-      if (!el || !dragEl) return;
+      if (!triggerEl || !dragEl) return;
 
-      return combine(
-        draggable({
-          element: dragEl,
-          getInitialData: () => ({ type: "column", id }),
-          onGenerateDragPreview({ nativeSetDragImage }) {
-            setCustomNativeDragPreview({
-              nativeSetDragImage,
-              render({ container }) {
-                if (!triggerRef) return;
-                const cloned = triggerRef.cloneNode(true) as HTMLElement;
-                cloned.style.width = triggerRef.clientWidth + "px";
-                cloned.style.height = triggerRef.clientHeight + "px";
-                container.appendChild(cloned);
-                return () => null;
-              },
-            });
-          },
-          onDragStart: () =>
-            setDragState({
-              state: "dragging",
-            }),
-          onDrop: () =>
-            setDragState({
-              state: "idle",
-            }),
-        }),
-        dropTargetForElements({
-          element: el,
-          getData: ({ input, element }) =>
-            attachClosestEdge(
-              { id },
-              {
-                input,
-                element,
-                allowedEdges: ["left", "right"],
-              },
-            ),
-          canDrop: ({ source }) =>
-            source.data.id !== id && source.data.type === "column",
-          onDrag: (args) => {
-            if (refState.current.state !== "over") return;
-
-            const closestEdge = extractClosestEdge(args.self.data) as
-              | "left"
-              | "right";
-
-            if (closestEdge !== refState.current.direction) {
-              setDragState({
-                state: "over",
-                direction: closestEdge,
-              });
-            }
-          },
-          onDragEnter: () =>
-            setDragState({
-              state: "over",
-              direction: "left",
-            }),
-          onDragLeave: () =>
-            setDragState({
-              state: "idle",
-            }),
-          onDrop: () =>
-            setDragState({
-              state: "idle",
-            }),
-        }),
-      );
+      return handleDrag({
+        id,
+        triggerEl,
+        dragEl,
+        setDragState,
+        state: refState,
+      });
     }, [triggerRef, dragHandleRef, id]);
 
     const openAddTaskModal = () => {
@@ -207,67 +131,25 @@ export const Column: React.FC<Props> = memo(
       [moveItems, id],
     );
 
-    const menuItems = useMemo(() => {
-      const currentIndex = moveItems.findIndex((item) => item.id === id);
-
-      const prevItem = currentIndex > 0 ? moveItems[currentIndex - 1] : null;
-
-      const nextItem =
-        currentIndex < moveItems.length - 1
-          ? moveItems[currentIndex + 1]
-          : null;
-
-      const moveBeforeItems = moveItems
-        .filter((item) => item.id !== id && item.id !== nextItem?.id)
-        .map((item) => ({
-          label: item.name,
-          onClick: () => onMoveColumn(id, item.id, "left"),
-        }));
-
-      const moveAfterItems = moveItems
-        .filter((item) => item.id !== id && item.id !== prevItem?.id)
-        .map((item) => ({
-          label: item.name,
-          onClick: () => onMoveColumn(id, item.id, "right"),
-        }));
-
-      const arr: MenuProps["items"] = [
-        {
-          label: "Edit",
-          icon: <IconEdit />,
-          onClick: () => onEdit(data),
-        },
-        {
-          label: "Delete",
-          icon: <IconDelete />,
-          onClick: () => onDelete(id),
-        },
-      ];
-
-      if (moveAfterItems.length) {
-        arr.splice(1, 0, {
-          label: "Move after",
-          icon: <IconMoveGroup />,
-          items: moveAfterItems,
-        });
-      }
-
-      if (moveBeforeItems.length) {
-        arr.splice(1, 0, {
-          label: "Move before",
-          icon: <IconMoveGroup />,
-          items: moveBeforeItems,
-        });
-      }
-
-      return arr;
-    }, [onDelete, onEdit, onMoveColumn, moveItems, data, id]);
+    const menuItems = useMemo(
+      () =>
+        prepareMenuItems({
+          id,
+          moveItems,
+          dataColumn: data,
+          onDelete,
+          onEdit,
+          onMoveColumn,
+        }),
+      [onDelete, onEdit, onMoveColumn, moveItems, data, id],
+    );
 
     return (
       <div
         className={cn(styles.column, className, {
           [styles[`column--${dragState.state}`]]: dragState.state,
           [styles[`column--${dragState.direction}`]]: dragState.direction,
+          [styles[`column--drag-${dragState.type}`]]: dragState.type,
         })}
         ref={(el) => {
           if (el !== triggerRef) {
@@ -295,19 +177,23 @@ export const Column: React.FC<Props> = memo(
           <Menu items={menuItems} />
         </div>
         <div className={styles.column__body}>
-          {items?.map((item) => (
-            <Card
-              {...item}
-              key={item.id}
-              onDelete={onDeleteTask}
-              onEdit={onEditTask}
-              selected={!!selectedItems?.[item.id]}
-              onChangeSelect={onChangeSelect}
-              onChangeStatus={onChangeStatusTask}
-              moveItems={filteredMoveItems}
-              onMoveTask={onMoveTask}
-            />
-          ))}
+          {items?.length
+            ? items.map((item) => (
+                <Card
+                  {...item}
+                  key={item.id}
+                  onDelete={onDeleteTask}
+                  onEdit={onEditTask}
+                  selected={!!selectedItems?.[item.id]}
+                  onChangeSelect={onChangeSelect}
+                  onChangeStatus={onChangeStatusTask}
+                  moveItems={filteredMoveItems}
+                  onMoveTask={onMoveTask}
+                />
+              ))
+            : dragState.type === "task" && (
+                <div className={styles.column__drag_task_marker} />
+              )}
         </div>
         <div className={styles.column__footer}>
           <Button fullWidth onClick={openAddTaskModal}>

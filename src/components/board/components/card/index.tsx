@@ -1,33 +1,17 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 
 import cn from "classnames";
-import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
-import {
-  draggable,
-  dropTargetForElements,
-} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import {
-  attachClosestEdge,
-  extractClosestEdge,
-} from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
-import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 
 import type { Actions, ITask } from "@/context/types";
 import { Menu } from "@/components/shared/menu";
-import {
-  IconDelete,
-  IconDone,
-  IconDragIndicator,
-  IconEdit,
-  IconMoveGroup,
-  IconNotDone,
-} from "@/components/icons";
+import { IconDragIndicator } from "@/components/icons";
 import { FieldCheckbox } from "@/components/shared/form/checkbox";
 import { Highlighted } from "@/components/shared/highlighted";
 import { ButtonIcon } from "@/components/shared/button";
 import type { TDragStateTask } from "@/types/common";
 
 import styles from "./style.module.scss";
+import { handleDrag, prepareMenuItems } from "./utils";
 
 interface Props extends ITask {
   selected: boolean;
@@ -66,133 +50,33 @@ export const Card: React.FC<Props> = memo(
     }, [dragState]);
 
     useEffect(() => {
-      const el = triggerRef;
+      const triggerEl = triggerRef;
       const dragEl = dragHandleRef.current;
 
-      if (!el || !dragEl) return;
+      if (!triggerEl || !dragEl) return;
 
-      return combine(
-        draggable({
-          element: dragEl,
-          getInitialData: () => ({ type: "task", id }),
-          onGenerateDragPreview({ nativeSetDragImage }) {
-            setCustomNativeDragPreview({
-              nativeSetDragImage,
-              render({ container }) {
-                if (!triggerRef) return;
-                const cloned = triggerRef.cloneNode(true) as HTMLElement;
-                cloned.style.width = triggerRef.clientWidth + "px";
-                cloned.style.height = triggerRef.clientHeight + "px";
-                container.appendChild(cloned);
-                return () => null;
-              },
-            });
-          },
-          onDragStart: () =>
-            setDragState({
-              state: "dragging",
-            }),
-          onDrop: () =>
-            setDragState({
-              state: "idle",
-            }),
-        }),
-        dropTargetForElements({
-          element: el,
-          getData: ({ input, element }) =>
-            attachClosestEdge(
-              { id },
-              {
-                input,
-                element,
-                allowedEdges: ["top", "bottom"],
-              },
-            ),
-          canDrop: ({ source }) =>
-            source.data.id !== id && source.data.type === "task",
-          onDrag: (args) => {
-            if (refState.current.state !== "over") return;
-
-            const closestEdge = extractClosestEdge(args.self.data) as
-              | "top"
-              | "bottom";
-
-            if (closestEdge !== refState.current.direction) {
-              setDragState({
-                state: "over",
-                direction: closestEdge,
-              });
-            }
-          },
-          onDragEnter: () =>
-            setDragState({
-              state: "over",
-              direction: "top",
-            }),
-          onDragLeave: () =>
-            setDragState({
-              state: "idle",
-            }),
-          onDrop: () =>
-            setDragState({
-              state: "idle",
-            }),
-        }),
-      );
+      return handleDrag({
+        id,
+        triggerEl,
+        dragEl,
+        setDragState,
+        state: refState,
+      });
     }, [triggerRef, id]);
 
-    const actions = useMemo(() => {
-      let arr = [
-        {
-          label: "Move to",
-          icon: <IconMoveGroup />,
-          items: moveItems.map((item) => ({
-            label: item.name,
-            onClick: () => onMoveTask(id, item.id),
-          })),
-        },
-        {
-          label: "Delete",
-          icon: <IconDelete />,
-          onClick: () => onDelete(id),
-        },
-      ];
-
-      if (!completed) {
-        arr = [
-          {
-            label: "Complete",
-            icon: <IconDone />,
-            onClick: () => onChangeStatus(id, true),
-          },
-          {
-            label: "Edit",
-            icon: <IconEdit />,
-            onClick: () => onEdit(id),
-          },
-          ...arr,
-        ];
-      } else {
-        arr = [
-          {
-            label: "Incomplete",
-            icon: <IconNotDone />,
-            onClick: () => onChangeStatus(id, false),
-          },
-          ...arr,
-        ];
-      }
-
-      return arr;
-    }, [
-      completed,
-      id,
-      onDelete,
-      onEdit,
-      onChangeStatus,
-      onMoveTask,
-      moveItems,
-    ]);
+    const actions = useMemo(
+      () =>
+        prepareMenuItems({
+          id,
+          moveItems,
+          onDelete,
+          onEdit,
+          onMoveTask,
+          completed,
+          onChangeStatus,
+        }),
+      [completed, id, onDelete, onEdit, onChangeStatus, onMoveTask, moveItems],
+    );
 
     return (
       <div
